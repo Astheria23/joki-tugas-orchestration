@@ -1,0 +1,81 @@
+# --- Secrets & local env ---
+.env
+.env.*
+!.env.example
+!.env*.example
+*.pem
+*.key
+credentials.json
+**/secrets/
+**/secret/
+
+# --- Go ---
+bin/
+dist/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+coverage.out
+coverage.html
+vendor/
+
+# --- Node / frontend (web/) ---
+node_modules/
+web/node_modules/
+web/dist/
+web/.vite/
+*.tsbuildinfo
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# --- Build / deploy artifacts ---
+deploy/**/.env
+deploy/**/.env.*
+!deploy/**/.env.example
+*.tar
+*.tar.gz
+*.zip
+
+# --- Logs & runtime ---
+logs/
+*.log
+tmp/
+temp/
+*.pid
+
+# --- OS / editor ---
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# --- AI tooling & agent context ---
+.ai-context/
+.cursor/
+.cursorignore
+.agents/
+.agent/
+.claude/
+.codex/
+.continue/
+.windsurf/
+.aider*
+.gemini/
+.github/copilot*
+AGENTS.md
+CLAUDE.md
+.copilot/
+*.ai.md
+.ai/
+**/agent-transcripts/
+**/mcp.json
+.mcp.json

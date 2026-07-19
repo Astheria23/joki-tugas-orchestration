@@ -1,0 +1,33 @@
+# Build Stage
+FROM golang:1.25-alpine AS builder
+
+WORKDIR /app
+
+# Copy dependency manifests
+COPY go.mod go.sum ./
+RUN go mod download
+
+# Copy application source code
+COPY . .
+
+# Build the orchestrator binary
+RUN CGO_ENABLED=0 GOOS=linux go build -o /app/bin/orchestrator ./service/orchestrator/cmd/main.go
+
+# Production Stage
+FROM alpine:latest
+
+# Install system dependencies
+RUN apk --no-cache add ca-certificates tzdata
+
+WORKDIR /app
+
+# Copy built binary from builder stage
+COPY --from=builder /app/bin/orchestrator /app/orchestrator
+
+# Copy entrypoint script
+COPY deploy/scripts/docker-entrypoint.sh /app/docker-entrypoint.sh
+RUN chmod +x /app/docker-entrypoint.sh
+
+EXPOSE 8080
+
+ENTRYPOINT ["/app/docker-entrypoint.sh"]

@@ -1,0 +1,4 @@
+include:
+  - path: docker-compose.infra.yml
+  - path: docker-compose.services.yml
+  - path: docker-compose.web.yml

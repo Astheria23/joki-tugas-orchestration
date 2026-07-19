@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  orchestrator:
+    build:
+      context: ../../
+      dockerfile: deploy/docker/Dockerfile.service
+    container_name: joki-orchestrator
+    restart: always
+    ports:
+      - "${PORT}:${PORT}"
+    environment:
+      - APP_ENV=${APP_ENV}
+      - PORT=${PORT}
+      - MONGO_URI=${MONGO_URI}
+      - MONGO_DB_NAME=${MONGO_DB_NAME}
+      - MONGO_TIMEOUT_SECONDS=${MONGO_TIMEOUT_SECONDS}
+    depends_on:
+      - mongo-db
