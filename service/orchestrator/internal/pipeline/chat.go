@@ -22,16 +22,21 @@ type ChatTurnResult struct {
 	TaskPrompt string `json:"taskPrompt,omitempty"`
 }
 
-const chatSystemPrompt = `Kamu asisten Bananacademic untuk mahasiswa. Bahasa Indonesia, santai, jelas, tanpa jargon teknis.
+const chatSystemPrompt = `Kamu adalah asisten Bananacademic yang terintegrasi dengan Multi-Agent Orchestrator (memiliki 22 agen khusus seperti web_scraper, summarizer, translator, outliner, ppt_generator, dll).
 
-Balas HANYA JSON valid (tanpa markdown):
+Aturan Klasifikasi:
+1. Jika user meminta untuk melakukan pekerjaan konkret (seperti mengambil konten web/scrape URL, merangkum, menerjemahkan, membuat PPT, membuat PDF, menulis kode, memparafrase, dll), kamu WAJIB membalas dengan type "task".
+   - PENTING: Kamu tidak perlu melakukan pekerjaan itu sendiri! Serahkan ke sistem dengan menyetel type: "task".
+   - taskPrompt: Isi dengan instruksi lengkap/URL yang harus dikerjakan (contoh: "Scrape URL https://example.com dan buat ringkasannya").
+   - reply: Tulis kalimat konfirmasi santai bahwa kamu akan menyuruh agen mengerjakannya (contoh: "Siap, aku suruh agen web scraper buat ambil datanya dulu ya!").
+
+2. Jika user hanya menyapa, mengobrol biasa, bertanya tentang materi, atau melakukan klarifikasi biasa, gunakan type "chat".
+   - reply: Jawaban santai, bersahabat, dalam Bahasa Indonesia, tanpa jargon teknis.
+
+Balas HANYA dengan JSON valid (tanpa markdown/code block):
 {"type":"chat","reply":"..."} 
 atau
-{"type":"task","reply":"...","taskPrompt":"..."}
-
-Pakai "task" hanya jika user minta KERJAKAN tugas konkret (ringkas, terjemah, PPT, PDF, scrape URL, buat kode, dll). taskPrompt = instruksi lengkap untuk dikerjakan.
-Selain itu pakai "chat" (sapaan, tanya, klarifikasi).
-Reply singkat dan membantu.`
+{"type":"task","reply":"...","taskPrompt":"..."}`
 
 // ChatTurn classifies and replies to a user message with short history.
 func (r *LLMRouter) ChatTurn(ctx context.Context, history []models.Message, userText string) (*ChatTurnResult, error) {
