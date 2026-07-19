@@ -20,9 +20,9 @@ Tabel ini digunakan untuk melacak status kesiapan dan pengujian 22 agen mandiri 
 
 | No | Agent | Author | Status |
 | :--- | :--- | :--- | :--- |
-| 1 | Agent Citation & Reference | SAM | 🟡 Pending Verification / Simulated Fallback |
-| 2 | Agent Translator | Kal | 🟢 **Integrated (Active Vercel URL)** |
-| 3 | Agent Parafrase | Piol | 🟢 **Integrated (Active Vercel URL)** |
+| 1 | Agent Citation & Reference | Hisyam | 🟡 Pending Verification / Simulated Fallback |
+| 2 | Agent Translator | Hekal | 🟢 **Integrated (Active Vercel URL)** |
+| 3 | Agent Parafrase | Viola | 🟢 **Integrated (Active Vercel URL)** |
 | 4 | Agent Database Querier | Adit | 🟢 **Integrated (Active Vercel URL)** |
 | 5 | Agent Summarizer | Qila | 🟡 Pending Verification / Simulated Fallback |
 | 6 | Agent Outliner | Eka | 🟡 Pending Verification / Simulated Fallback |
@@ -31,17 +31,17 @@ Tabel ini digunakan untuk melacak status kesiapan dan pengujian 22 agen mandiri 
 | 9 | Agent Joki Programmer | Aghni | 🟡 Pending Verification / Simulated Fallback |
 | 10 | Agent Task Requirement Analyzer | Srh | 🟡 Pending Verification / Simulated Fallback |
 | 11 | Agent Diagram Builder | Ahmad | 🟡 Pending Verification / Simulated Fallback |
-| 12 | Agent Fact Checker | Zif | 🟡 Pending Verification / Simulated Fallback |
+| 12 | Agent Fact Checker | Razif | 🟡 Pending Verification / Simulated Fallback |
 | 13 | Agent Typo Checker | Dina | 🟡 Pending Verification / Simulated Fallback |
 | 14 | Agent Data Mining | Dwi | 🟡 Pending Verification / Simulated Fallback |
 | 15 | Agent Dokumen Comparator (PR Reviewer) | Fadel | 🟡 Pending Verification / Simulated Fallback |
 | 16 | Agent Format & Layout Formatter PDF | Restu | 🟡 Pending Verification / Simulated Fallback |
 | 17 | Agent Web Scrapper | Octa | 🟢 **Integrated (Active Local Python Service)** |
 | 18 | Agent Literature Reviewer | Iqbal | 🟡 Pending Verification / Simulated Fallback |
-| 19 | Agent Pembuat Kesimpulan & Rekomendasi | Farit | 🟡 Pending Verification / Simulated Fallback |
+| 19 | Agent Pembuat Kesimpulan & Rekomendasi | Farid | 🟡 Pending Verification / Simulated Fallback |
 | 20 | Agent Prompt Generator | Hilmi | 🟡 Pending Verification / Simulated Fallback |
-| 21 | Agent QA & Bug Hunter | Iki | 🟡 Pending Verification / Simulated Fallback |
-| 22 | Agent Essay Writer | Abdul | 🟡 Pending Verification / Simulated Fallback |
+| 21 | Agent QA & Bug Hunter | Rizki | 🟡 Pending Verification / Simulated Fallback |
+| 22 | Agent Essay Writer | Reyhan | 🟡 Pending Verification / Simulated Fallback |
 
 ---
 
