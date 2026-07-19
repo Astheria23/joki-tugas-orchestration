@@ -8,7 +8,6 @@ Joki Tugas AI adalah platform otomatisasi pengerjaan tugas akademik berbasis Mul
 1. **API Gateway & Router LLM:** Backend berbasis Go (Gin Gonic) yang memproses input user menggunakan model LLM (DeepSeek) untuk menyusun alur kerja agen.
 2. **WebSocket Logs Stream:** Menyalurkan log progres real-time langsung ke antarmuka pengguna dari setiap agen yang berjalan di background.
 3. **Smart Skip (Type-Safe Circuit Breaker):** Jika salah satu agen mengalami kegagalan, orkestrator akan mengecek tipe data input-output (Contract-Safe) dan melakukan bypass secara otomatis (Smart Skip) jika tipe data kompatibel, atau melakukan penghentian darurat (Hard Stop).
-4. **Brutalist Editorial UI:** Desain dashboard modern minimalis kaku (Artoria Style) berlatar krem (`#ECE7DC`) dengan sudut 90 derajat tajam (`rounded-none`), tipografi editorial Serif (Cormorant Garamond), dan terminal konsol Monospace (JetBrains Mono).
 5. **JWT Authentication:** Pembatasan akses gateway operator menggunakan otentikasi token JWT.
 6. **State Manager:** Penyimpanan data histori eksekusi, log obrolan, dan status tugas di MongoDB.
 
