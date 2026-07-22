@@ -20,7 +20,7 @@ Tabel ini digunakan untuk melacak status kesiapan dan pengujian 22 agen mandiri 
 
 | No | Agent | Author | Status |
 | :--- | :--- | :--- | :--- |
-| 1 | System Orchestrator | Okta | 🟢 **Aktif** |
+| 1 | System Orchestrator | Okta | 🟢 **ON DEV** |
 | 2 | Agent Citation & Reference | Hisyam / Syam | 🟢 **Aktif** |
 | 3 | Agent Translator | Haekal | 🟢 **Aktif** |
 | 4 | Agent Parafrase | Viola / Piol | 🟢 **Aktif** |
@@ -35,14 +35,13 @@ Tabel ini digunakan untuk melacak status kesiapan dan pengujian 22 agen mandiri 
 | 13 | Agent Fact Checker | Razif / Zif | 🟢 **Aktif** |
 | 14 | Agent Typo Checker | Dina | 🟢 **Aktif** |
 | 15 | Agent Data Mining | Dwi | 🔴 **Error (Contract Mismatch)** |
-| 16 | Agent Dokumen Comparator (PR Reviewer) | Fadel | 🟡 Verifikasi |
-| 17 | Agent Format & Layout Formatter PDF | Restu | 🟢 **Aktif** |
-| 18 | Agent Web Scraper | Fadhail | 🔴 **Error (Contract Mismatch)** |
-| 19 | Agent Literature Reviewer | Iqbal | 🔴 **Error (LLM Token Expired)** |
-| 20 | Agent Pembuat Kesimpulan & Rekomendasi | Farid | 🔴 **Error (Contract Mismatch)** |
-| 21 | Agent Prompt Generator | Hilmi | 🟢 **Aktif** |
-| 22 | Agent QA & Bug Hunter | Iqmal / Iki | 🟢 **Aktif** |
-| 23 | Agent Essay Writer | Reyhan | 🔴 **Error (Contract Mismatch)** |
+| 16 | Agent Format & Layout Formatter PDF | Restu | 🟢 **Aktif** |
+| 17 | Agent Web Scraper | Fadhail | 🔴 **Error (Contract Mismatch)** |
+| 18 | Agent Literature Reviewer | Iqbal | 🔴 **Error (LLM Token Expired)** |
+| 19 | Agent Pembuat Kesimpulan & Rekomendasi | Farid | 🔴 **Error (Contract Mismatch)** |
+| 20 | Agent Prompt Generator | Hilmi | 🟢 **Aktif** |
+| 21 | Agent QA & Bug Hunter | Iqmal / Iki | 🟢 **Aktif** |
+| 22 | Agent Essay Writer | Reyhan | 🔴 **Error (Contract Mismatch)** |
 
 ---
 
