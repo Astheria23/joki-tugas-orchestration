@@ -27,6 +27,7 @@ export function ChatPage() {
     decideTask,
   } = useChat();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [inputValue, setInputValue] = useState('');
 
   const quotaLabel =
     me != null ? `Sisa chat: ${quotaLeft}/${me.chatLimit}` : 'Sisa chat: …';
@@ -124,7 +125,42 @@ export function ChatPage() {
             onDecide={(taskId, action) => void decideTask(taskId, action)}
           />
 
+          {messages.length === 0 && !thinking && (
+            <div className="flex flex-wrap gap-2 px-4 pb-2 justify-center">
+              <button
+                type="button"
+                onClick={() => setInputValue("/template joki_makalah\n[Paste referensi/topik makalah di sini]")}
+                className="text-xs bg-ink/5 hover:bg-ink/10 rounded-full px-3 py-1.5 transition-colors font-medium border border-ink/10 text-ink/70"
+              >
+                🎓 Joki Makalah
+              </button>
+              <button
+                type="button"
+                onClick={() => setInputValue("/template joki_koding\n[Jelaskan tugas koding/error di sini]")}
+                className="text-xs bg-ink/5 hover:bg-ink/10 rounded-full px-3 py-1.5 transition-colors font-medium border border-ink/10 text-ink/70"
+              >
+                💻 Joki Koding
+              </button>
+              <button
+                type="button"
+                onClick={() => setInputValue("/template joki_presentasi\n[Paste bahan materi PPT di sini]")}
+                className="text-xs bg-ink/5 hover:bg-ink/10 rounded-full px-3 py-1.5 transition-colors font-medium border border-ink/10 text-ink/70"
+              >
+                📊 PPT Generator
+              </button>
+              <button
+                type="button"
+                onClick={() => setInputValue("/template review_tugas\n[Paste jawaban/teks tugas kamu di sini]")}
+                className="text-xs bg-ink/5 hover:bg-ink/10 rounded-full px-3 py-1.5 transition-colors font-medium border border-ink/10 text-ink/70"
+              >
+                🕵️‍♂️ Review Tugas
+              </button>
+            </div>
+          )}
+
           <ChatInput
+            value={inputValue}
+            onChange={setInputValue}
             disabled={quotaExhausted}
             sending={sending}
             placeholder={
@@ -134,7 +170,10 @@ export function ChatPage() {
                   ? 'Sedang mikir…'
                   : 'Tulis pesan… (Enter kirim, Shift+Enter baris baru)'
             }
-            onSend={send}
+            onSend={() => {
+              void send(inputValue);
+              setInputValue('');
+            }}
           />
         </section>
       </div>

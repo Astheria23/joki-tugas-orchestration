@@ -22,6 +22,10 @@ export const AGENTS = [
   { key: 'database_querier', label: 'DB Querier', in: 'text', out: 'text', desc: 'Query dan jelaskan data' },
   { key: 'context_memory', label: 'Context Memory', in: 'text', out: 'text', desc: 'Simpan dan lanjutkan konteks' },
   { key: 'supervisor', label: 'Supervisor', in: 'text | code', out: 'text', desc: 'Validasi hasil akhir vs permintaan' },
+  { key: 'essay_writer', label: 'Essay Writer', in: 'text', out: 'text', desc: 'Tulis draf esai / makalah' },
+  { key: 'prompt_generator', label: 'Prompt Generator', in: 'text', out: 'text', desc: 'Susun prompt coding yang jelas' },
+  { key: 'qa_bug_hunter', label: 'QA Bug Hunter', in: 'text | code', out: 'text', desc: 'Cari bug dan isu QA di kode' },
+  { key: 'kesimpulan_saran', label: 'Kesimpulan & Saran', in: 'text', out: 'text', desc: 'Buat kesimpulan dan rekomendasi' },
 ] as const;
 
 export function agentLabel(key: string): string {

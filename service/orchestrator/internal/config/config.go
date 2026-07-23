@@ -49,6 +49,10 @@ func Load() *Config {
 		"database_querier":     env.GetString("AGENT_DATABASE_QUERIER_URL", ""),
 		"context_memory":       env.GetString("AGENT_CONTEXT_MEMORY_URL", ""),
 		"supervisor":           env.GetString("AGENT_SUPERVISOR_URL", ""),
+		"kesimpulan_saran":     env.GetString("AGENT_KESIMPULAN_SARAN_URL", ""),
+		"prompt_generator":     env.GetString("AGENT_PROMPT_GENERATOR_URL", ""),
+		"qa_bug_hunter":        env.GetString("AGENT_QA_BUG_HUNTER_URL", ""),
+		"essay_writer":         env.GetString("AGENT_ESSAY_WRITER_URL", ""),
 	}
 
 	// Normalize agent keys

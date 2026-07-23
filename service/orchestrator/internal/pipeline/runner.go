@@ -115,6 +115,10 @@ var AgentContracts = map[string]AgentContract{
 	"database_querier":     {Inputs: []string{"text"}, Outputs: []string{"text"}},
 	"context_memory":       {Inputs: []string{"text"}, Outputs: []string{"text"}},
 	"supervisor":           {Inputs: []string{"text", "code"}, Outputs: []string{"text"}},
+	"kesimpulan_saran":     {Inputs: []string{"text"}, Outputs: []string{"text"}},
+	"prompt_generator":     {Inputs: []string{"text"}, Outputs: []string{"text"}},
+	"qa_bug_hunter":        {Inputs: []string{"text", "code"}, Outputs: []string{"text"}},
+	"essay_writer":         {Inputs: []string{"text"}, Outputs: []string{"text"}},
 }
 
 var urlRegex = regexp.MustCompile(`https?://[^\s]+`)
@@ -191,7 +195,7 @@ func (pr *PipelineRunner) ApproveAndRun(taskID, conversationID, userID string) e
 	return nil
 }
 
-// CancelTask cancels a task waiting for approval.
+// CancelTask cancels a task waiting for approval or currently running.
 func (pr *PipelineRunner) CancelTask(taskID, conversationID, userID string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
@@ -200,17 +204,31 @@ func (pr *PipelineRunner) CancelTask(taskID, conversationID, userID string) erro
 	if err != nil {
 		return err
 	}
+	
+	wasRunning := false
 	if !ok {
-		return fmt.Errorf("task is not awaiting approval")
+		ok, err = pr.repo.CompareAndSetStatus(ctx, taskID, "running", "cancelled")
+		if err != nil {
+			return err
+		}
+		if !ok {
+			return fmt.Errorf("task cannot be cancelled (not awaiting approval or running)")
+		}
+		wasRunning = true
 	}
 
 	_ = pr.messages.SetApprovalByTaskID(ctx, taskID, models.ApprovalCancelled)
+
+	content := "Oke, dibatalin. Kalau mau ganti rencana, tulis aja permintaan barunya."
+	if wasRunning {
+		content = "Oke, prosesnya aku stop secara paksa. Mending kita batalin di awal daripada ngabisin token. 🛑 Ada revisi apa nih?"
+	}
 
 	msg := &models.Message{
 		ConversationID: conversationID,
 		UserID:         userID,
 		Role:           models.RoleAssistant,
-		Content:        "Oke, dibatalin. Kalau mau ganti rencana, tulis aja permintaan barunya.",
+		Content:        content,
 		Kind:           models.KindTaskCancelled,
 		TaskID:         taskID,
 		ApprovalStatus: models.ApprovalCancelled,

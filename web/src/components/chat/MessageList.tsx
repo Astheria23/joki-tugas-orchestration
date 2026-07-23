@@ -176,6 +176,18 @@ export function MessageList({ messages, thinking, decidingTaskId, onDecide }: Me
                     </button>
                   </div>
                 )}
+                {live?.status === 'running' && m.taskId && onDecide && (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      disabled={deciding}
+                      onClick={() => onDecide(m.taskId!, 'cancel')}
+                      className="rounded-full border border-rose-300 bg-rose-50 text-rose-700 px-4 py-2 text-xs font-semibold hover:bg-rose-100 disabled:opacity-50 flex items-center gap-1"
+                    >
+                      🛑 Stop (Batal)
+                    </button>
+                  </div>
+                )}
                 {m.approvalStatus === 'cancelled' && (
                   <p className="mt-2 text-xs text-ink/45">Rencana ini dibatalin.</p>
                 )}

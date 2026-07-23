@@ -1,29 +1,27 @@
-import { useState } from 'react';
 import { Send } from 'lucide-react';
 
 interface ChatInputProps {
+  value: string;
+  onChange: (val: string) => void;
   disabled?: boolean;
   sending?: boolean;
   placeholder?: string;
-  onSend: (text: string) => Promise<void> | void;
+  onSend: () => Promise<void> | void;
 }
 
-export function ChatInput({ disabled, sending, placeholder, onSend }: ChatInputProps) {
-  const [text, setText] = useState('');
-
+export function ChatInput({ value, onChange, disabled, sending, placeholder, onSend }: ChatInputProps) {
   const submit = async () => {
-    const value = text.trim();
-    if (!value || disabled || sending) return;
-    setText('');
-    await onSend(value);
+    const trimmed = value.trim();
+    if (!trimmed || disabled || sending) return;
+    await onSend();
   };
 
   return (
     <div className="border-t border-ink/8 bg-white/90 backdrop-blur p-4">
       <div className="max-w-3xl mx-auto flex items-end gap-2">
         <textarea
-          value={text}
-          onChange={(e) => setText(e.target.value)}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
           rows={1}
           disabled={disabled || sending}
           placeholder={placeholder ?? 'Tulis pesan…'}
@@ -37,7 +35,7 @@ export function ChatInput({ disabled, sending, placeholder, onSend }: ChatInputP
         />
         <button
           type="button"
-          disabled={disabled || sending || !text.trim()}
+          disabled={disabled || sending || !value.trim()}
           onClick={() => void submit()}
           className="shrink-0 rounded-full bg-banana text-ink p-3 hover:bg-banana-deep disabled:opacity-40 transition-colors"
           aria-label="Kirim"

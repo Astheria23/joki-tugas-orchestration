@@ -67,6 +67,29 @@ type ChatResponse struct {
 
 // RoutePrompt parses the prompt into a type-safe sequential array of agent names.
 func (r *LLMRouter) RoutePrompt(ctx context.Context, prompt string) ([]string, error) {
+	// 1. Intercept Pre-defined Templates (Fast-path without LLM)
+	promptLower := strings.ToLower(strings.TrimSpace(prompt))
+	if strings.HasPrefix(promptLower, "/template ") {
+		parts := strings.SplitN(promptLower, " ", 2)
+		if len(parts) == 2 {
+			tmpl := strings.TrimSpace(parts[1])
+			logging.Log.Info().Str("template", tmpl).Msg("Triggering hardcoded pipeline template")
+			switch tmpl {
+			case "joki_makalah":
+				return []string{"web_scraper", "data_mining", "literature_reviewer", "essay_writer", "citation_reference", "typo_checker", "pdf_formatter"}, nil
+			case "joki_koding":
+				return []string{"prompt_generator", "programmer", "qa_bug_hunter", "supervisor"}, nil
+			case "joki_presentasi":
+				return []string{"web_scraper", "summarizer", "outliner", "ppt_generator"}, nil
+			case "review_tugas":
+				return []string{"typo_checker", "fact_checker", "supervisor", "kesimpulan_saran"}, nil
+			case "analisis_data":
+				return []string{"data_mining", "database_querier", "diagram_builder"}, nil
+			}
+		}
+	}
+
+	// 2. Normal LLM Routing if no template matched
 	if r.apiKey == "" {
 		logging.Log.Warn().Msg("OPENCODE_GO_API_KEY is not configured. Falling back to local heuristic routing.")
 		return r.fallbackRoute(prompt), nil
@@ -98,6 +121,10 @@ Available agents are:
 20. database_querier (input: text -> output: text) - Execute database queries.
 21. context_memory (input: text -> output: text) - Retrieve/save conversation context memory.
 22. supervisor (input: text|code -> output: text) - Quality control check of outputs.
+23. essay_writer (input: text -> output: text) - Write academic essays / makalah drafts.
+24. prompt_generator (input: text -> output: text) - Expand task briefs into strong coding prompts.
+25. qa_bug_hunter (input: text|code -> output: text) - Find bugs and QA issues in code.
+26. kesimpulan_saran (input: text -> output: text) - Write conclusions and recommendations.
 
 Rules:
 - Respond ONLY with a valid JSON object containing a "pipeline" key which is an array of strings representing the agent names in sequential order of execution.

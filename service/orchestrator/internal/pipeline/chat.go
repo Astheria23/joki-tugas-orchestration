@@ -40,6 +40,15 @@ atau
 
 // ChatTurn classifies and replies to a user message with short history.
 func (r *LLMRouter) ChatTurn(ctx context.Context, history []models.Message, userText string) (*ChatTurnResult, error) {
+	// Fast-path: /template chips must always spawn a task pipeline.
+	if strings.HasPrefix(strings.ToLower(strings.TrimSpace(userText)), "/template ") {
+		return &ChatTurnResult{
+			Type:       "task",
+			Reply:      "Siap! Aku pakai template itu dulu, cek langkahnya ya — Gas kalau udah oke.",
+			TaskPrompt: userText,
+		}, nil
+	}
+
 	if r.apiKey == "" {
 		return heuristicChatTurn(userText), nil
 	}
@@ -130,10 +139,17 @@ func (r *LLMRouter) ChatTurn(ctx context.Context, history []models.Message, user
 
 func heuristicChatTurn(userText string) *ChatTurnResult {
 	lower := strings.ToLower(userText)
+	if strings.HasPrefix(strings.TrimSpace(lower), "/template ") {
+		return &ChatTurnResult{
+			Type:       "task",
+			Reply:      "Siap! Aku pakai template itu dulu, cek langkahnya ya — Gas kalau udah oke.",
+			TaskPrompt: userText,
+		}
+	}
 	taskHints := []string{
 		"kerjakan", "ringkas", "rangkum", "terjemah", "ppt", "presentasi", "slide",
 		"pdf", "scrape", "scrap", "http://", "https://", "buatkan", "tuliskan kode",
-		"parafrase", "sitasi", "outline",
+		"parafrase", "sitasi", "outline", "/template",
 	}
 	for _, h := range taskHints {
 		if strings.Contains(lower, h) {
@@ -181,6 +197,10 @@ var agentDisplayNames = map[string]string{
 	"database_querier":     "query database",
 	"context_memory":       "penyimpan konteks",
 	"supervisor":           "pemeriksa hasil akhir",
+	"kesimpulan_saran":     "pembuat kesimpulan & saran",
+	"prompt_generator":     "pembuat prompt",
+	"qa_bug_hunter":        "pemeriksa QA & bug",
+	"essay_writer":         "penulis esai / makalah",
 }
 
 func humanAgentLabel(agentKey string) string {

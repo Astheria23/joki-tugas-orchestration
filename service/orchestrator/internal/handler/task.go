@@ -125,25 +125,30 @@ func (h *TaskHandler) DecideTask(c *gin.Context) {
 		response.Error(c, http.StatusForbidden, "access denied")
 		return
 	}
-	if task.Status != "awaiting_approval" {
-		response.Error(c, http.StatusConflict, "tugas ini sudah tidak menunggu persetujuan")
-		return
-	}
 
 	action := strings.ToLower(strings.TrimSpace(input.Action))
 	switch action {
 	case "approve", "gas":
+		if task.Status != "awaiting_approval" {
+			response.Error(c, http.StatusConflict, "tugas ini sudah tidak menunggu persetujuan")
+			return
+		}
 		if err := h.runner.ApproveAndRun(id, task.ConversationID, userIDStr); err != nil {
 			response.Error(c, http.StatusConflict, err.Error())
 			return
 		}
 		response.JSON(c, http.StatusOK, gin.H{"status": "running", "taskId": id})
 	case "cancel", "batal":
-		if err := h.runner.CancelTask(id, task.ConversationID, userIDStr); err != nil {
-			response.Error(c, http.StatusConflict, err.Error())
+		// Allow cancel while awaiting approval OR mid-run (Stop button).
+		if task.Status != "awaiting_approval" || task.Status == "running" {
+			if err := h.runner.CancelTask(id, task.ConversationID, userIDStr); err != nil {
+				response.Error(c, http.StatusConflict, err.Error())
+				return
+			}
+			response.JSON(c, http.StatusOK, gin.H{"status": "cancelled", "taskId": id})
 			return
 		}
-		response.JSON(c, http.StatusOK, gin.H{"status": "cancelled", "taskId": id})
+		response.Error(c, http.StatusConflict, "tugas ini sudah tidak bisa dibatalkan")
 	default:
 		response.Error(c, http.StatusBadRequest, "action harus approve atau cancel")
 	}
