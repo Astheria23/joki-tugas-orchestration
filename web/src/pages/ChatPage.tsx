@@ -1,11 +1,13 @@
 import { LogOut, Menu, X } from 'lucide-react';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { BrandLogo } from '../components/BrandLogo';
+import { AgentTimeline } from '../components/chat/AgentTimeline';
 import { ChatInput } from '../components/chat/ChatInput';
 import { ChatSidebar } from '../components/chat/ChatSidebar';
 import { MessageList } from '../components/chat/MessageList';
 import { useAuth } from '../hooks/useAuth';
 import { useChat } from '../hooks/useChat';
+import { parseTemplateFromInput, TASK_TEMPLATES } from '../lib/templates';
 
 export function ChatPage() {
   const { user, logout } = useAuth();
@@ -28,6 +30,8 @@ export function ChatPage() {
   } = useChat();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [inputValue, setInputValue] = useState('');
+
+  const templatePreview = useMemo(() => parseTemplateFromInput(inputValue), [inputValue]);
 
   const quotaLabel =
     me != null ? `Sisa chat: ${quotaLeft}/${me.chatLimit}` : 'Sisa chat: …';
@@ -63,7 +67,6 @@ export function ChatPage() {
       </header>
 
       <div className="flex-1 flex min-h-0 relative">
-        {/* Desktop sidebar */}
         <div className="hidden lg:block w-72 shrink-0 h-full">
           <ChatSidebar
             conversations={conversations}
@@ -75,7 +78,6 @@ export function ChatPage() {
           />
         </div>
 
-        {/* Mobile drawer */}
         {sidebarOpen && (
           <div className="lg:hidden absolute inset-0 z-30 flex">
             <div className="w-72 h-full bg-white shadow-xl relative z-10">
@@ -125,36 +127,41 @@ export function ChatPage() {
             onDecide={(taskId, action) => void decideTask(taskId, action)}
           />
 
-          {messages.length === 0 && !thinking && (
+          {messages.length === 0 && !thinking && !templatePreview && (
             <div className="flex flex-wrap gap-2 px-4 pb-2 justify-center">
-              <button
-                type="button"
-                onClick={() => setInputValue("/template joki_makalah\n[Paste referensi/topik makalah di sini]")}
-                className="text-xs bg-ink/5 hover:bg-ink/10 rounded-full px-3 py-1.5 transition-colors font-medium border border-ink/10 text-ink/70"
-              >
-                🎓 Joki Makalah
-              </button>
-              <button
-                type="button"
-                onClick={() => setInputValue("/template joki_koding\n[Jelaskan tugas koding/error di sini]")}
-                className="text-xs bg-ink/5 hover:bg-ink/10 rounded-full px-3 py-1.5 transition-colors font-medium border border-ink/10 text-ink/70"
-              >
-                💻 Joki Koding
-              </button>
-              <button
-                type="button"
-                onClick={() => setInputValue("/template joki_presentasi\n[Paste bahan materi PPT di sini]")}
-                className="text-xs bg-ink/5 hover:bg-ink/10 rounded-full px-3 py-1.5 transition-colors font-medium border border-ink/10 text-ink/70"
-              >
-                📊 PPT Generator
-              </button>
-              <button
-                type="button"
-                onClick={() => setInputValue("/template review_tugas\n[Paste jawaban/teks tugas kamu di sini]")}
-                className="text-xs bg-ink/5 hover:bg-ink/10 rounded-full px-3 py-1.5 transition-colors font-medium border border-ink/10 text-ink/70"
-              >
-                🕵️‍♂️ Review Tugas
-              </button>
+              {TASK_TEMPLATES.map((t) => (
+                <button
+                  key={t.id}
+                  type="button"
+                  onClick={() => setInputValue(t.draft)}
+                  className="text-xs bg-ink/5 hover:bg-ink/10 rounded-full px-3 py-1.5 transition-colors font-medium border border-ink/10 text-ink/70"
+                >
+                  {t.title}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {templatePreview && (
+            <div className="mx-4 mb-2 rounded-2xl border border-ink/10 bg-white px-4 py-3 shadow-sm">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-ink/40">
+                    Preview langkah · {templatePreview.title}
+                  </p>
+                  <p className="text-sm text-ink/70 mt-1">
+                    Cek dulu rangkaiannya. Ganti teks di bawah, baru kirim — nanti tetap ada Gas/Batal.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  className="text-xs text-ink/45 hover:text-ink shrink-0"
+                  onClick={() => setInputValue('')}
+                >
+                  Tutup
+                </button>
+              </div>
+              <AgentTimeline agents={templatePreview.pipeline} status="awaiting" />
             </div>
           )}
 
@@ -168,7 +175,9 @@ export function ChatPage() {
                 ? `Kuota chat habis (${me?.chatLimit ?? 0}/${me?.chatLimit ?? 0})`
                 : thinking
                   ? 'Sedang mikir…'
-                  : 'Tulis pesan… (Enter kirim, Shift+Enter baris baru)'
+                  : templatePreview
+                    ? `Lengkapi ${templatePreview.hint}, lalu Enter untuk kirim`
+                    : 'Tulis pesan… (Enter kirim, Shift+Enter baris baru)'
             }
             onSend={() => {
               void send(inputValue);

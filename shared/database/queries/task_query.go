@@ -28,6 +28,12 @@ func (r *TaskRepository) Create(ctx context.Context, task *models.Task) error {
 	if task.ID.IsZero() {
 		task.ID = bson.NewObjectID()
 	}
+	if task.History == nil {
+		task.History = []models.History{}
+	}
+	if task.Pipeline == nil {
+		task.Pipeline = []string{}
+	}
 	now := time.Now()
 	task.CreatedAt = now
 	task.UpdatedAt = now
@@ -86,10 +92,19 @@ func (r *TaskRepository) AppendHistory(ctx context.Context, taskID string, histo
 	if err != nil {
 		return fmt.Errorf("invalid task ID format: %w", err)
 	}
-
 	if history.Timestamp.IsZero() {
 		history.Timestamp = time.Now()
 	}
+
+	// Ensure history is an array (legacy docs may have null — $push would fail).
+	_, _ = r.collection.UpdateOne(ctx,
+		bson.M{"_id": objID, "history": bson.M{"$type": "null"}},
+		bson.M{"$set": bson.M{"history": bson.A{}}},
+	)
+	_, _ = r.collection.UpdateOne(ctx,
+		bson.M{"_id": objID, "history": bson.M{"$exists": false}},
+		bson.M{"$set": bson.M{"history": bson.A{}}},
+	)
 
 	update := bson.M{
 		"$push": bson.M{

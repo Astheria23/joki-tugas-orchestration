@@ -5,19 +5,66 @@ import { AgentTimeline } from './AgentTimeline';
 
 function ResultBlock({ content }: { content: string }) {
   const [copied, setCopied] = useState(false);
-  const isUrl = /^https?:\/\//i.test(content.trim());
+  const url = content.trim();
+  const isUrl = /^https?:\/\//i.test(url);
+  const lower = url.toLowerCase();
+  const isPdf = isUrl && (lower.includes('.pdf') || lower.includes('/pdf') || lower.endsWith('pdf'));
+  const isPpt =
+    isUrl &&
+    (lower.includes('.ppt') ||
+      lower.includes('.pptx') ||
+      lower.includes('pptx') ||
+      lower.includes('presentation'));
+  const isImage = isUrl && /\.(png|jpe?g|gif|webp|svg)(\?|$)/i.test(url);
 
   if (isUrl) {
+    const canEmbedPdf = isPdf;
+    // Office Online embed often blank for some storage hosts (e.g. Supabase) — prefer download.
+    const canEmbedPpt = false;
+
     return (
-      <a
-        href={content.trim()}
-        target="_blank"
-        rel="noreferrer"
-        className="inline-flex items-center gap-2 rounded-full bg-ink text-white px-3 py-1.5 text-xs font-semibold mt-2"
-      >
-        <Download className="h-3.5 w-3.5" />
-        Unduh hasil
-      </a>
+      <div className="mt-2 space-y-2">
+        {canEmbedPdf && (
+          <iframe
+            title="Preview PDF"
+            src={url}
+            className="w-full h-72 rounded-xl border border-ink/10 bg-white"
+          />
+        )}
+        {canEmbedPpt && isPpt && (
+          <iframe
+            title="Preview PPT"
+            src={`https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(url)}`}
+            className="w-full h-72 rounded-xl border border-ink/10 bg-white"
+          />
+        )}
+        {isImage && (
+          <a href={url} target="_blank" rel="noreferrer" className="block">
+            <img
+              src={url}
+              alt="Hasil"
+              className="max-h-72 rounded-xl border border-ink/10 object-contain bg-white"
+            />
+          </a>
+        )}
+        {(isPpt || isPdf) && (
+          <p className="text-xs text-ink/50">
+            {isPpt ? 'File PPTX siap diunduh.' : 'File PDF siap diunduh / dipreview.'}
+          </p>
+        )}
+        <a
+          href={url}
+          target="_blank"
+          rel="noreferrer"
+          className="inline-flex items-center gap-2 rounded-full bg-ink text-white px-3 py-1.5 text-xs font-semibold"
+        >
+          <Download className="h-3.5 w-3.5" />
+          Unduh / buka hasil
+        </a>
+        {!isPdf && !isPpt && !isImage && (
+          <p className="text-[11px] text-ink/40 break-all">{url}</p>
+        )}
+      </div>
     );
   }
 
@@ -65,7 +112,13 @@ export function MessageList({ messages, thinking, decidingTaskId, onDecide }: Me
   const liveByTask = useMemo(() => {
     const map = new Map<
       string,
-      { currentStep: number; status: string; stopped: boolean; latestProgressIdx: number }
+      {
+        currentStep: number;
+        status: string;
+        stopped: boolean;
+        latestProgressIdx: number;
+        skippedSteps: number[];
+      }
     >();
 
     messages.forEach((m, idx) => {
@@ -75,6 +128,7 @@ export function MessageList({ messages, thinking, decidingTaskId, onDecide }: Me
         status: 'pending',
         stopped: false,
         latestProgressIdx: -1,
+        skippedSteps: [],
       };
 
       if (m.kind === 'task_pipeline') {
@@ -93,6 +147,10 @@ export function MessageList({ messages, thinking, decidingTaskId, onDecide }: Me
       } else if (m.kind === 'task_progress') {
         const match = m.content.match(/\((\d+)\s*\/\s*(\d+)\)/);
         if (match) prev.currentStep = Number(match[1]);
+        if (m.content.includes('dilewati') && match) {
+          const step = Number(match[1]);
+          if (!prev.skippedSteps.includes(step)) prev.skippedSteps.push(step);
+        }
         if (!prev.stopped) prev.status = 'running';
         prev.latestProgressIdx = idx;
       }
@@ -155,6 +213,7 @@ export function MessageList({ messages, thinking, decidingTaskId, onDecide }: Me
                       : live?.currentStep ?? 0
                   }
                   status={live?.status ?? (awaiting ? 'awaiting' : undefined)}
+                  skippedSteps={live?.skippedSteps ?? []}
                 />
                 {awaiting && m.taskId && onDecide && (
                   <div className="mt-3 flex flex-wrap gap-2">

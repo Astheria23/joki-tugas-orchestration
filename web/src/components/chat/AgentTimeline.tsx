@@ -6,9 +6,11 @@ interface AgentTimelineProps {
   currentStep?: number;
   /** final status if known */
   status?: 'pending' | 'running' | 'completed' | 'failed' | 'awaiting' | 'cancelled' | string;
+  /** 1-based steps that were soft-skipped */
+  skippedSteps?: number[];
 }
 
-export function AgentTimeline({ agents, currentStep = 0, status }: AgentTimelineProps) {
+export function AgentTimeline({ agents, currentStep = 0, status, skippedSteps = [] }: AgentTimelineProps) {
   if (!agents?.length) return null;
 
   return (
@@ -21,10 +23,14 @@ export function AgentTimeline({ agents, currentStep = 0, status }: AgentTimeline
           const stepNum = idx + 1;
           let tone = 'bg-white border-ink/10 text-ink/40';
           let mark = '○';
+          const wasSkipped = skippedSteps.includes(stepNum);
 
           if (status === 'awaiting' || status === 'cancelled' || status === 'pending') {
             tone = 'bg-white border-ink/10 text-ink/45';
             mark = '○';
+          } else if (wasSkipped) {
+            tone = 'bg-amber-50 border-amber-300 text-amber-800';
+            mark = '–';
           } else if (status === 'completed') {
             tone = 'bg-leaf/10 border-leaf/40 text-leaf';
             mark = '✓';

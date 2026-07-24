@@ -1,13 +1,12 @@
-version: '3.8'
-
 services:
   web:
     build:
       context: ../../
       dockerfile: deploy/docker/Dockerfile.web
     container_name: joki-web
-    restart: always
+    restart: unless-stopped
     ports:
-      - "3000:80"
+      - "${WEB_PORT:-3000}:80"
     depends_on:
-      - orchestrator
+      orchestrator:
+        condition: service_healthy

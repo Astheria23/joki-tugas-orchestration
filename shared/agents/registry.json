@@ -1,0 +1,264 @@
+{
+  "agents": [
+    {
+      "key": "web_scraper",
+      "label": "Web Scraper",
+      "labelId": "pengambil konten web",
+      "desc": "Ambil konten dari URL target (orkestrator resolve URL / topik dulu)",
+      "inputs": ["url"],
+      "outputs": ["text"],
+      "envUrl": "AGENT_WEB_SCRAPER_URL",
+      "onError": "stop"
+    },
+    {
+      "key": "data_mining",
+      "label": "Data Mining",
+      "labelId": "analisis data",
+      "desc": "Ekstrak pola dan insight dari teks",
+      "inputs": ["text", "url"],
+      "outputs": ["text"],
+      "envUrl": "AGENT_DATA_MINING_URL",
+      "onError": "stop"
+    },
+    {
+      "key": "summarizer",
+      "label": "Summarizer",
+      "labelId": "perangkum",
+      "desc": "Ringkas laporan panjang jadi poin padat",
+      "inputs": ["text"],
+      "outputs": ["text"],
+      "envUrl": "AGENT_SUMMARIZER_URL",
+      "onError": "stop"
+    },
+    {
+      "key": "outliner",
+      "label": "Outliner",
+      "labelId": "pembuat kerangka",
+      "desc": "Susun kerangka struktur materi",
+      "inputs": ["text"],
+      "outputs": ["outline"],
+      "envUrl": "AGENT_OUTLINER_URL",
+      "onError": "stop"
+    },
+    {
+      "key": "translator",
+      "label": "Translator",
+      "labelId": "penerjemah",
+      "desc": "Terjemahkan ke bahasa target",
+      "inputs": ["text"],
+      "outputs": ["text"],
+      "envUrl": "AGENT_TRANSLATOR_URL",
+      "onError": "stop"
+    },
+    {
+      "key": "paraphrase",
+      "label": "Paraphrase",
+      "labelId": "parafrase",
+      "desc": "Parafrase agar lebih natural",
+      "inputs": ["text"],
+      "outputs": ["text"],
+      "envUrl": "AGENT_PARAPHRASE_URL",
+      "onError": "stop"
+    },
+    {
+      "key": "typo_checker",
+      "label": "Typo Checker",
+      "labelId": "pemeriksa ejaan",
+      "desc": "Perbaiki ejaan dan tata bahasa",
+      "inputs": ["text"],
+      "outputs": ["text"],
+      "envUrl": "AGENT_TYPO_CHECKER_URL",
+      "onError": "skip"
+    },
+    {
+      "key": "fact_checker",
+      "label": "Fact Checker",
+      "labelId": "pemeriksa fakta",
+      "desc": "Verifikasi klaim terhadap sumber",
+      "inputs": ["text"],
+      "outputs": ["text"],
+      "envUrl": "AGENT_FACT_CHECKER_URL",
+      "onError": "skip"
+    },
+    {
+      "key": "literature_reviewer",
+      "label": "Literature Reviewer",
+      "labelId": "review literatur",
+      "desc": "Ringkas literatur akademik relevan",
+      "inputs": ["text"],
+      "outputs": ["text"],
+      "envUrl": "AGENT_LITERATURE_REVIEWER_URL",
+      "onError": "stop"
+    },
+    {
+      "key": "citation_reference",
+      "label": "Citation",
+      "labelId": "pembuat sitasi",
+      "desc": "Format sitasi APA / MLA / IEEE",
+      "inputs": ["text"],
+      "outputs": ["text"],
+      "envUrl": "AGENT_CITATION_REFERENCE_URL",
+      "onError": "stop"
+    },
+    {
+      "key": "qna_simulator",
+      "label": "QnA Simulator",
+      "labelId": "simulator tanya-jawab",
+      "desc": "Simulasi tanya-jawab dari materi",
+      "inputs": ["text"],
+      "outputs": ["text"],
+      "envUrl": "AGENT_QNA_SIMULATOR_URL",
+      "onError": "stop"
+    },
+    {
+      "key": "math_calculator",
+      "label": "Math Solver",
+      "labelId": "penyelesai soal matematika",
+      "desc": "Selesaikan soal matematika step-by-step",
+      "inputs": ["text"],
+      "outputs": ["text"],
+      "envUrl": "AGENT_MATH_CALCULATOR_URL",
+      "onError": "stop"
+    },
+    {
+      "key": "spatial_gis",
+      "label": "Spatial GIS",
+      "labelId": "pemroses data peta",
+      "desc": "Proses data spasial / GIS",
+      "inputs": ["text"],
+      "outputs": ["text"],
+      "envUrl": "AGENT_SPATIAL_GIS_URL",
+      "onError": "stop"
+    },
+    {
+      "key": "requirement_analyzer",
+      "label": "Requirement Analyzer",
+      "labelId": "analisis kebutuhan",
+      "desc": "Analisis kebutuhan perangkat lunak",
+      "inputs": ["text"],
+      "outputs": ["text"],
+      "envUrl": "AGENT_REQUIREMENT_ANALYZER_URL",
+      "onError": "stop"
+    },
+    {
+      "key": "diagram_builder",
+      "label": "Diagram Builder",
+      "labelId": "pembuat diagram",
+      "desc": "Bangun diagram dari deskripsi",
+      "inputs": ["text"],
+      "outputs": ["file"],
+      "envUrl": "AGENT_DIAGRAM_BUILDER_URL",
+      "onError": "stop"
+    },
+    {
+      "key": "ppt_generator",
+      "label": "PPT Generator",
+      "labelId": "pembuat presentasi / PPT",
+      "desc": "Susun slide presentasi PPTX",
+      "inputs": ["text", "outline"],
+      "outputs": ["file"],
+      "envUrl": "AGENT_PPT_GENERATOR_URL",
+      "onError": "stop"
+    },
+    {
+      "key": "pdf_formatter",
+      "label": "PDF Formatter",
+      "labelId": "pembuat PDF",
+      "desc": "Format dokumen PDF siap kirim",
+      "inputs": ["text"],
+      "outputs": ["file"],
+      "envUrl": "AGENT_PDF_FORMATTER_URL",
+      "onError": "stop"
+    },
+    {
+      "key": "programmer",
+      "label": "Programmer",
+      "labelId": "penulis kode",
+      "desc": "Tulis kode dari spesifikasi",
+      "inputs": ["text"],
+      "outputs": ["code"],
+      "envUrl": "AGENT_PROGRAMMER_URL",
+      "onError": "stop"
+    },
+    {
+      "key": "pr_reviewer",
+      "label": "PR Reviewer",
+      "labelId": "pemeriksa kode",
+      "desc": "Review kode dan saran perbaikan",
+      "inputs": ["code"],
+      "outputs": ["text"],
+      "envUrl": "AGENT_PR_REVIEWER_URL",
+      "onError": "skip"
+    },
+    {
+      "key": "database_querier",
+      "label": "DB Querier",
+      "labelId": "query database",
+      "desc": "Query dan jelaskan data",
+      "inputs": ["text"],
+      "outputs": ["text"],
+      "envUrl": "AGENT_DATABASE_QUERIER_URL",
+      "onError": "stop"
+    },
+    {
+      "key": "context_memory",
+      "label": "Context Memory",
+      "labelId": "penyimpan konteks",
+      "desc": "Simpan dan lanjutkan konteks",
+      "inputs": ["text"],
+      "outputs": ["text"],
+      "envUrl": "AGENT_CONTEXT_MEMORY_URL",
+      "onError": "skip"
+    },
+    {
+      "key": "supervisor",
+      "label": "Supervisor",
+      "labelId": "pemeriksa hasil akhir",
+      "desc": "Validasi hasil akhir vs permintaan",
+      "inputs": ["text", "code"],
+      "outputs": ["text"],
+      "envUrl": "AGENT_SUPERVISOR_URL",
+      "onError": "skip"
+    },
+    {
+      "key": "essay_writer",
+      "label": "Essay Writer",
+      "labelId": "penulis esai / makalah",
+      "desc": "Tulis draf esai / makalah",
+      "inputs": ["text"],
+      "outputs": ["text"],
+      "envUrl": "AGENT_ESSAY_WRITER_URL",
+      "onError": "stop"
+    },
+    {
+      "key": "prompt_generator",
+      "label": "Prompt Generator",
+      "labelId": "pembuat prompt",
+      "desc": "Susun prompt coding yang jelas",
+      "inputs": ["text"],
+      "outputs": ["text"],
+      "envUrl": "AGENT_PROMPT_GENERATOR_URL",
+      "onError": "stop"
+    },
+    {
+      "key": "qa_bug_hunter",
+      "label": "QA Bug Hunter",
+      "labelId": "pemeriksa QA & bug",
+      "desc": "Cari bug dan isu QA di kode",
+      "inputs": ["text", "code"],
+      "outputs": ["text"],
+      "envUrl": "AGENT_QA_BUG_HUNTER_URL",
+      "onError": "skip"
+    },
+    {
+      "key": "kesimpulan_saran",
+      "label": "Kesimpulan & Saran",
+      "labelId": "pembuat kesimpulan & saran",
+      "desc": "Buat kesimpulan dan rekomendasi",
+      "inputs": ["text"],
+      "outputs": ["text"],
+      "envUrl": "AGENT_KESIMPULAN_SARAN_URL",
+      "onError": "skip"
+    }
+  ]
+}

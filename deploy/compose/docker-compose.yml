@@ -1,3 +1,8 @@
+# Full stack: MongoDB + Orchestrator + Web (Nginx)
+# Dari folder app/:
+#   docker compose -f deploy/compose/docker-compose.yml --env-file .env up -d --build
+# atau: task compose:up
+
 include:
   - path: docker-compose.infra.yml
   - path: docker-compose.services.yml

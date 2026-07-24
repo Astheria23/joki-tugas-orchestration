@@ -4,14 +4,17 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"regexp"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/Astheria23/jokiOrchestrator/service/orchestrator/internal/config"
+	"github.com/Astheria23/jokiOrchestrator/shared/agents"
 	"github.com/Astheria23/jokiOrchestrator/shared/database/queries"
 	"github.com/Astheria23/jokiOrchestrator/shared/logging"
 	"github.com/Astheria23/jokiOrchestrator/shared/models"
@@ -26,6 +29,8 @@ type PipelineRunner struct {
 	convs    *queries.ConversationRepository
 	router   *LLMRouter
 	client   *http.Client
+	// cancels maps taskID -> cancel func for in-flight executeAgents context
+	cancels sync.Map
 }
 
 // NewPipelineRunner creates a new PipelineRunner instance.
@@ -76,49 +81,13 @@ type AgentRequest struct {
 
 // AgentResponse defines the success return body from agent.
 type AgentResponse struct {
-	Status  string `json:"status"`
-	TaskID  string `json:"task_id"`
-	Data    *struct {
+	Status string `json:"status"`
+	TaskID string `json:"task_id"`
+	Data   *struct {
 		Result  string `json:"result"`
 		FileURL string `json:"file_url"`
 	} `json:"data"`
 	Message string `json:"message"`
-}
-
-// AgentContract defines the input/output types of an agent.
-type AgentContract struct {
-	Inputs  []string
-	Outputs []string
-}
-
-// AgentContracts records type rules for the circuit breaker.
-var AgentContracts = map[string]AgentContract{
-	"web_scraper":          {Inputs: []string{"url"}, Outputs: []string{"text"}},
-	"data_mining":          {Inputs: []string{"text", "url"}, Outputs: []string{"text"}},
-	"summarizer":           {Inputs: []string{"text"}, Outputs: []string{"text"}},
-	"outliner":             {Inputs: []string{"text"}, Outputs: []string{"outline"}},
-	"translator":           {Inputs: []string{"text"}, Outputs: []string{"text"}},
-	"paraphrase":           {Inputs: []string{"text"}, Outputs: []string{"text"}},
-	"typo_checker":         {Inputs: []string{"text"}, Outputs: []string{"text"}},
-	"fact_checker":         {Inputs: []string{"text"}, Outputs: []string{"text"}},
-	"literature_reviewer":  {Inputs: []string{"text"}, Outputs: []string{"text"}},
-	"citation_reference":   {Inputs: []string{"text"}, Outputs: []string{"text"}},
-	"qna_simulator":        {Inputs: []string{"text"}, Outputs: []string{"text"}},
-	"math_calculator":      {Inputs: []string{"text"}, Outputs: []string{"text"}},
-	"spatial_gis":          {Inputs: []string{"text"}, Outputs: []string{"text"}},
-	"requirement_analyzer": {Inputs: []string{"text"}, Outputs: []string{"text"}},
-	"diagram_builder":      {Inputs: []string{"text"}, Outputs: []string{"file"}},
-	"ppt_generator":        {Inputs: []string{"text", "outline"}, Outputs: []string{"file"}},
-	"pdf_formatter":        {Inputs: []string{"text"}, Outputs: []string{"file"}},
-	"programmer":           {Inputs: []string{"text"}, Outputs: []string{"code"}},
-	"pr_reviewer":          {Inputs: []string{"code"}, Outputs: []string{"text"}},
-	"database_querier":     {Inputs: []string{"text"}, Outputs: []string{"text"}},
-	"context_memory":       {Inputs: []string{"text"}, Outputs: []string{"text"}},
-	"supervisor":           {Inputs: []string{"text", "code"}, Outputs: []string{"text"}},
-	"kesimpulan_saran":     {Inputs: []string{"text"}, Outputs: []string{"text"}},
-	"prompt_generator":     {Inputs: []string{"text"}, Outputs: []string{"text"}},
-	"qa_bug_hunter":        {Inputs: []string{"text", "code"}, Outputs: []string{"text"}},
-	"essay_writer":         {Inputs: []string{"text"}, Outputs: []string{"text"}},
 }
 
 var urlRegex = regexp.MustCompile(`https?://[^\s]+`)
@@ -128,24 +97,15 @@ func extractURL(prompt string) string {
 }
 
 func getAgentOutputType(agentName string) string {
-	contract, ok := AgentContracts[strings.ToLower(agentName)]
-	if !ok || len(contract.Outputs) == 0 {
-		return "text"
-	}
-	return contract.Outputs[0]
+	return agents.OutputType(agentName)
 }
 
 func isAgentInputCompatible(outputType string, nextAgentName string) bool {
-	contract, ok := AgentContracts[strings.ToLower(nextAgentName)]
-	if !ok {
-		return false
-	}
-	for _, inType := range contract.Inputs {
-		if inType == outputType {
-			return true
-		}
-	}
-	return false
+	return agents.InputCompatible(outputType, nextAgentName)
+}
+
+func errorsIsCanceled(err error) bool {
+	return err != nil && (errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded))
 }
 
 // RunTask starts planning + (legacy) waits for approval only via chat flow.
@@ -218,6 +178,15 @@ func (pr *PipelineRunner) CancelTask(taskID, conversationID, userID string) erro
 	}
 
 	_ = pr.messages.SetApprovalByTaskID(ctx, taskID, models.ApprovalCancelled)
+
+	// Abort in-flight HTTP to the current agent immediately (if running).
+	if wasRunning {
+		if v, ok := pr.cancels.Load(taskID); ok {
+			if cancelFn, ok := v.(context.CancelFunc); ok {
+				cancelFn()
+			}
+		}
+	}
 
 	content := "Oke, dibatalin. Kalau mau ganti rencana, tulis aja permintaan barunya."
 	if wasRunning {
@@ -354,7 +323,11 @@ func (pr *PipelineRunner) planPipeline(taskID, prompt, conversationID, userID st
 
 func (pr *PipelineRunner) executeAgents(taskID, prompt, conversationID, userID string, pipelineSteps []string) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
-	defer cancel()
+	pr.cancels.Store(taskID, cancel)
+	defer func() {
+		cancel()
+		pr.cancels.Delete(taskID)
+	}()
 
 	logging.Log.Info().Str("taskId", taskID).Msg("Executing approved pipeline")
 
@@ -385,8 +358,17 @@ func (pr *PipelineRunner) executeAgents(taskID, prompt, conversationID, userID s
 
 	currentPayloadText := prompt
 	extractedURL := extractURL(prompt)
+	currentType := "text"
+	if extractedURL != "" {
+		currentType = "url"
+	}
 
 	for i, agentName := range pipelineSteps {
+		if ctx.Err() != nil {
+			logging.Log.Info().Str("taskId", taskID).Msg("Task context cancelled — stopping execution")
+			return
+		}
+
 		// Abort if task was cancelled mid-run (best-effort check)
 		task, err := pr.repo.FindByID(ctx, taskID)
 		if err == nil && task.Status == "cancelled" {
@@ -412,12 +394,49 @@ func (pr *PipelineRunner) executeAgents(taskID, prompt, conversationID, userID s
 		} else {
 			if agentURL == "" {
 				execErr = fmt.Errorf("agent endpoint URL is not configured")
+			} else if strings.EqualFold(agentName, "web_scraper") {
+				if extractURL(prompt) == "" && extractURL(currentPayloadText) == "" {
+					notify("progress", "Sedang cari sumber di web dulu, baru di-scrape…", task)
+				}
+				respData, execErr = pr.scrapeOrchestrate(ctx, taskID, agentURL, prompt, currentPayloadText)
 			} else {
 				respData, execErr = pr.executeAgent(ctx, taskID, agentName, agentURL, extractedURL, currentPayloadText)
 			}
 		}
 
 		if execErr != nil {
+			if ctx.Err() != nil || errorsIsCanceled(execErr) {
+				logging.Log.Info().Str("taskId", taskID).Str("agent", agentName).Msg("Step aborted by cancel")
+				return
+			}
+
+			label := humanAgentLabel(agentName)
+			canSkip := agents.ErrorPolicy(agentName) == agents.OnErrorSkip
+			nextOK := false
+			if canSkip {
+				if i+1 < len(pipelineSteps) {
+					nextOK = isAgentInputCompatible(currentType, pipelineSteps[i+1])
+				} else {
+					nextOK = true
+				}
+			}
+
+			if canSkip && nextOK {
+				logging.Log.Warn().Err(execErr).Str("taskId", taskID).Str("agent", agentName).Msg("Step failed — soft skip, continuing")
+				historyItem := models.History{
+					Step:      i + 1,
+					AgentKey:  agentName,
+					Status:    "skipped",
+					Input:     AgentRequestPayload{URL: extractedURL, RawText: currentPayloadText},
+					Error:     execErr.Error(),
+					Timestamp: time.Now(),
+				}
+				_ = pr.repo.AppendHistory(ctx, taskID, historyItem)
+				task, _ = pr.repo.FindByID(ctx, taskID)
+				notify("progress", fmt.Sprintf("%s dilewati (%d/%d) — sedang bermasalah, lanjut…", label, i+1, len(pipelineSteps)), task)
+				continue
+			}
+
 			logging.Log.Error().Err(execErr).Str("taskId", taskID).Str("agent", agentName).Msg("Step failed — hard stop (no further agents)")
 
 			historyItem := models.History{
@@ -458,6 +477,12 @@ func (pr *PipelineRunner) executeAgents(taskID, prompt, conversationID, userID s
 		}
 		_ = pr.repo.AppendHistory(ctx, taskID, historyItem)
 		currentPayloadText = resultText
+		currentType = getAgentOutputType(agentName)
+	}
+
+	if ctx.Err() != nil {
+		logging.Log.Info().Str("taskId", taskID).Msg("Pipeline aborted before completion (cancelled)")
+		return
 	}
 
 	logging.Log.Info().Str("taskId", taskID).Msg("Pipeline execution completed successfully")

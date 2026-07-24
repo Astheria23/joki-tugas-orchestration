@@ -49,12 +49,12 @@ tasks:
   compose:up:
     desc: Start full stack containers (infra + backend + web Nginx)
     cmds:
-      - docker compose -f deploy/compose/docker-compose.yml up -d
+      - docker compose -f deploy/compose/docker-compose.yml --env-file .env up -d --build
 
   compose:down:
     desc: Stop and clean full stack containers
     cmds:
-      - docker compose -f deploy/compose/docker-compose.yml down
+      - docker compose -f deploy/compose/docker-compose.yml --env-file .env down
 
   clean:
     desc: Stop containers and clean compiled local binaries
@@ -62,3 +62,13 @@ tasks:
       - rm -rf bin/
       - docker compose -f deploy/compose/docker-compose.infra.yml down
       - docker compose -f deploy/compose/docker-compose.yml down
+
+  agents:check:
+    desc: Hit every registered agent with the standard orchestrator contract payload
+    cmds:
+      - go run ./tools/agentcheck
+
+  agents:check:md:
+    desc: Same as agents:check but print a Markdown table (for README paste)
+    cmds:
+      - go run ./tools/agentcheck --markdown

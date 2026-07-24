@@ -11,6 +11,7 @@ import (
 	"time"
 	"unicode/utf8"
 
+	"github.com/Astheria23/jokiOrchestrator/shared/agents"
 	"github.com/Astheria23/jokiOrchestrator/shared/logging"
 	"github.com/Astheria23/jokiOrchestrator/shared/models"
 )
@@ -174,40 +175,8 @@ func truncateRunes(s string, max int) string {
 	return string(runes[:max]) + "…"
 }
 
-var agentDisplayNames = map[string]string{
-	"web_scraper":          "pengambil konten web",
-	"data_mining":          "analisis data",
-	"summarizer":           "perangkum",
-	"outliner":             "pembuat kerangka",
-	"translator":           "penerjemah",
-	"paraphrase":           "parafrase",
-	"typo_checker":         "pemeriksa ejaan",
-	"fact_checker":         "pemeriksa fakta",
-	"literature_reviewer":  "review literatur",
-	"citation_reference":   "pembuat sitasi",
-	"qna_simulator":        "simulator tanya-jawab",
-	"math_calculator":      "penyelesai soal matematika",
-	"spatial_gis":          "pemroses data peta",
-	"requirement_analyzer": "analisis kebutuhan",
-	"diagram_builder":      "pembuat diagram",
-	"ppt_generator":        "pembuat presentasi / PPT",
-	"pdf_formatter":        "pembuat PDF",
-	"programmer":           "penulis kode",
-	"pr_reviewer":          "pemeriksa kode",
-	"database_querier":     "query database",
-	"context_memory":       "penyimpan konteks",
-	"supervisor":           "pemeriksa hasil akhir",
-	"kesimpulan_saran":     "pembuat kesimpulan & saran",
-	"prompt_generator":     "pembuat prompt",
-	"qa_bug_hunter":        "pemeriksa QA & bug",
-	"essay_writer":         "penulis esai / makalah",
-}
-
 func humanAgentLabel(agentKey string) string {
-	if name, ok := agentDisplayNames[strings.ToLower(agentKey)]; ok {
-		return name
-	}
-	return strings.ReplaceAll(agentKey, "_", " ")
+	return agents.LabelID(agentKey)
 }
 
 // FriendlyAgentError asks the LLM for a short, human apology when an agent fails.

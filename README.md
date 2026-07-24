@@ -1,77 +1,183 @@
 # Joki Tugas AI: Multi-Agent System (MAS) Orchestrator
 
-Joki Tugas AI adalah platform otomatisasi pengerjaan tugas akademik berbasis Multi-Agent System (MAS). Platform ini bertindak sebagai otak utama (API Gateway & Pipeline Manager) yang menerjemahkan bahasa natural dari pengguna, menyusun urutan rencana tugas (pipeline), dan mendistribusikannya ke 22 agen mikro secara sekuensial dan asinkron.
+Joki Tugas AI (produk UI: **Bananacademic**) adalah platform otomatisasi pengerjaan tugas akademik berbasis Multi-Agent System (MAS). Platform ini bertindak sebagai otak utama (API Gateway & Pipeline Manager) yang menerjemahkan bahasa natural dari pengguna, menyusun urutan rencana tugas (pipeline), dan mendistribusikannya ke agen mikro secara sekuensial dan asinkron.
 
 ---
 
-## 🚀 Fitur Utama & Arsitektur
-1. **API Gateway & Router LLM:** Backend berbasis Go (Gin Gonic) yang memproses input user menggunakan model LLM (DeepSeek) untuk menyusun alur kerja agen.
-2. **WebSocket Logs Stream:** Menyalurkan log progres real-time langsung ke antarmuka pengguna dari setiap agen yang berjalan di background.
-3. **Smart Skip (Type-Safe Circuit Breaker):** Jika salah satu agen mengalami kegagalan, orkestrator akan mengecek tipe data input-output (Contract-Safe) dan melakukan bypass secara otomatis (Smart Skip) jika tipe data kompatibel, atau melakukan penghentian darurat (Hard Stop).
-4. **Brutalist Editorial UI:** Desain dashboard modern minimalis kaku (Artoria Style) berlatar krem (`#ECE7DC`) dengan sudut 90 derajat tajam (`rounded-none`), tipografi editorial Serif (Cormorant Garamond), dan terminal konsol Monospace (JetBrains Mono).
-5. **JWT Authentication:** Pembatasan akses gateway operator menggunakan otentikasi token JWT.
-6. **State Manager:** Penyimpanan data histori eksekusi, log obrolan, dan status tugas di MongoDB.
+## Fitur utama
+
+1. **API Gateway & Router LLM** — Backend Go (Gin) + OpenCode Go (DeepSeek) untuk klasifikasi chat vs task dan routing pipeline.
+2. **Chat workspace** — Kuota chat lifetime, WebSocket progress, approval **Gas / Batal**, tombol **Stop** mid-run.
+3. **Agent Registry (SSOT)** — [`shared/agents/registry.json`](shared/agents/registry.json): key, kontrak I/O, `envUrl`, `onError` (`stop` | `skip`). Dipakai Go + FE.
+4. **Scraper + web search** — Orkestrator resolve topik → URL (`WEB_SEARCH_PROVIDER`) lalu panggil `web_scraper` dengan payload URL-only.
+5. **Template chips** — `/template joki_makalah|joki_koding|joki_presentasi|review_tugas|analisis_data` + preview langkah di FE.
+6. **JWT + MongoDB** — Auth user, task per user, histori chat & pipeline.
 
 ---
 
-## 📊 Tabel Integrasi Agen Mandiri (22 Agents Tracking)
+## Status integrasi agen
 
-Tabel ini digunakan untuk melacak status kesiapan dan pengujian 22 agen mandiri yang didelegasikan oleh orkestrator:
-
-| No | Agent | Author | Status |
+| No | Agent key | Author | Status |
 | :--- | :--- | :--- | :--- |
-| 1 | System Orchestrator | Okta | 🟢 **ON DEV** |
-| 2 | Agent Citation & Reference | Hisyam / Syam | 🟢 **Aktif** |
-| 3 | Agent Translator | Haekal | 🟢 **Aktif** |
-| 4 | Agent Parafrase | Viola / Piol | 🟢 **Aktif** |
-| 5 | Agent Database Querier | Adit | 🟢 **Aktif** |
-| 6 | Agent Summarizer | Qila | 🟡 Verifikasi |
-| 7 | Agent Outliner | Eka | 🟡 Verifikasi |
-| 8 | Agent Simulasi Tanya-Jawab | Ferdy | 🔴 **Error (Contract Mismatch)** |
-| 9 | Agent PPT Generator | Indra | 🟢 **Aktif** |
-| 10 | Agent Joki Programmer | Aghni | 🟢 **Aktif** |
-| 11 | Agent Task Requirement Analyzer (Supervisor) | Sarah | 🔴 **Error (Endpoint Timeout/Down)** |
-| 12 | Agent Diagram Builder | Ahmad | 🔴 **Error (LLM Token Expired)** |
-| 13 | Agent Fact Checker | Razif / Zif | 🟢 **Aktif** |
-| 14 | Agent Typo Checker | Dina | 🟢 **Aktif** |
-| 15 | Agent Data Mining | Dwi | 🔴 **Error (Contract Mismatch)** |
-| 16 | Agent Format & Layout Formatter PDF | Restu | 🟢 **Aktif** |
-| 17 | Agent Web Scraper | Fadhail | 🔴 **Error (Contract Mismatch)** |
-| 18 | Agent Literature Reviewer | Iqbal | 🔴 **Error (LLM Token Expired)** |
-| 19 | Agent Pembuat Kesimpulan & Rekomendasi | Farid | 🔴 **Error (Contract Mismatch)** |
-| 20 | Agent Prompt Generator | Hilmi | 🟢 **Aktif** |
-| 21 | Agent QA & Bug Hunter | Iqmal / Iki | 🟢 **Aktif** |
-| 22 | Agent Essay Writer | Reyhan | 🔴 **Error (Contract Mismatch)** |
+| — | System Orchestrator | Okta | 🟢 Aktif |
+| 1 | `web_scraper` | Fadhail | 🟢 Aktif |
+| 2 | `data_mining` | Dwi | 🟢 Aktif |
+| 3 | `summarizer` | Qila | 🟢 Aktif |
+| 4 | `outliner` | Eka | 🟢 Aktif |
+| 5 | `translator` | Haekal | 🟢 Aktif |
+| 6 | `paraphrase` | Viola / Piol | 🟢 Aktif |
+| 7 | `typo_checker` | Dina | 🟢 Aktif |
+| 8 | `fact_checker` | Razif / Zif | 🟢 Aktif |
+| 9 | `literature_reviewer` | Iqbal | 🟢 Aktif |
+| 10 | `citation_reference` | Hisyam / Syam | 🟢 Aktif |
+| 11 | `qna_simulator` | Ferdy | 🟢 Aktif |
+| 12 | `math_calculator` | — | 🟢 Aktif |
+| 13 | `spatial_gis` | — | 🟢 Aktif |
+| 14 | `requirement_analyzer` | Sarah | 🟢 Aktif |
+| 15 | `diagram_builder` | Ahmad | 🟢 Aktif |
+| 16 | `ppt_generator` | Indra | 🟢 Aktif |
+| 17 | `pdf_formatter` | Restu | 🟢 Aktif |
+| 18 | `programmer` | Aghni | 🟢 Aktif |
+| 19 | `pr_reviewer` | — | 🟢 Aktif |
+| 20 | `database_querier` | Adit | 🟢 Aktif |
+| 21 | `context_memory` | — | 🟢 Aktif |
+| 22 | `supervisor` | Sarah | 🟢 Aktif |
+| 23 | `essay_writer` | Reyhan | 🟢 Aktif |
+| 24 | `prompt_generator` | Hilmi | 🟢 Aktif |
+| 25 | `qa_bug_hunter` | Iqmal / Iki | 🟢 Aktif |
+| 26 | `kesimpulan_saran` | Farid | 🟢 Aktif |
+
+### Template pipeline (fast-path)
+
+| Template | Pipeline |
+| :--- | :--- |
+| `joki_makalah` | scraper → data_mining → literature → essay → citation → typo → pdf |
+| `joki_koding` | prompt_generator → programmer → qa_bug_hunter → supervisor |
+| `joki_presentasi` | scraper → summarizer → outliner → ppt |
+| `review_tugas` | typo → fact_checker → supervisor → kesimpulan_saran |
+| `analisis_data` | data_mining → database_querier → diagram_builder |
+
+Cek kontrak agen kapan saja:
+
+```bash
+task agents:check
+task agents:check:md
+```
 
 ---
 
-## 📝 Log Revisi Integrasi (23 Juli 2026)
+## Cara menjalankan
 
-Berikut adalah catatan revisi untuk tim pembuat agen berdasarkan hasil uji coba API `(Payload Contract: task_id, agent_type, payload.raw_text)`:
+### Prasyarat
 
-| No | Agent / Author | Bukti Payload Response (Error) | Action Required (Tindakan) |
-| :--- | :--- | :--- | :--- |
-| 1 | **Kesimpulan Saran** (Farid) | `<pre>Status: 400<br/>{<br/>  "success": false,<br/>  "error": "Properti \"text\" atau \"workspaceFile\" wajib dikirim..."<br/>}</pre>` | Agent mengharapkan parameter bernama `"text"` di dalam request body. Tolong ubah logic kode agar mengekstrak string teks dari `payload.raw_text`. |
-| 2 | **Task Requirement Analyzer** (Sarah) | `<pre>Status: Timeout 15 Detik<br/>Error: HTTPSConnectionPool(host='agent-supervisor-production...', port=443): Read timed out.</pre>` | API Server di Railway nyangkut/mati total tidak memberi respon. Tolong cek status deploy Railway apakah sedang *cold start* lama atau error *crash*. |
-| 3 | **Tanya Jawab** (Ferdy) | `<pre>Status: 400<br/>{<br/>  "status": "error",<br/>  "message": "Input \"pertanyaan\" tidak boleh kosong."<br/>}</pre>` | Agent mengharapkan adanya parameter bernama `"pertanyaan"`. Tolong ubah logic kode agar mengekstrak string teks dari `payload.raw_text`. |
-| 4 | **Diagram Builder** (Ahmad) | `<pre>Status: 200<br/>{<br/>  "status": "error",<br/>  "message": "LLM translation error: 404 models/gemini-1.5-flash is not found..."<br/>}</pre>` | Server merespon sukses, tetapi proses di internal error karena *Limit/Token API* Gemini habis, atau penamaan *model* salah. Tolong ganti API Key atau update library Gemini. |
-| 5 | **Data Mining** (Dwi) | `<pre>Status: 422<br/>{<br/>  "detail": [<br/>    {<br/>      "type": "missing",<br/>      "loc": ["body", "metadata"],<br/>      "msg": "Field required"<br/>    }<br/>  ]<br/>}</pre>` | Agent mewajibkan adanya objek `"metadata"`. Orchestrator tidak mengirim ini. Tolong hapus mandatory validasi untuk `metadata`. |
-| 6 | **Essay Writer** (Reyhan) | `<pre>Status: 400<br/>{<br/>  "status": "error",<br/>  "message": "Parameter 'topic' wajib diisi"<br/>}</pre>` | Agent mengharapkan parameter `"topic"`. Tolong ubah logic kode agar membaca *topic* langsung dari string di `payload.raw_text`. |
-| 7 | **Web Scraper** (Fadhail) | `<pre>Status: 422<br/>{<br/>  "detail": [<br/>    {<br/>      "loc": ["body", "payload", "url"],<br/>      "msg": "Field required"<br/>    },<br/>    {<br/>      "loc": ["body", "metadata"],<br/>      "msg": "Field required"<br/>    }<br/>  ]<br/>}</pre>` | Agent meminta adanya `"url"` dan `"metadata"`. Tolong ambil target URL langsung dari `payload.raw_text` saja, dan abaikan `metadata`. |
-| 8 | **Literature Review** (Iqbal) | `<pre>Status: 500<br/>{<br/>  "message": "Gagal memproses review: 429 You exceeded your current quota..."<br/>}</pre>` | Path API sudah benar di `/api/review`, tetapi *Limit/Token API* Gemini (`gemini-2.0-flash`) habis/melebihi limit *Free Tier*. Tolong ganti API Key Google AI Studionya dengan akun yang lain. |
+- Docker
+- [Go Task](https://taskfile.dev/) (opsional, tapi dipakai di bawah)
+- Go 1.25+ & Node 20+ (untuk mode lokal tanpa compose penuh)
+
+### 1) Setup env
+
+```bash
+cd app/
+cp .env.example .env
+```
+
+Isi minimal di `.env`:
+
+- `OPENCODE_GO_API_KEY` / `JWT_SECRET`
+- URL agen (`AGENT_*_URL`) sesuai registry
+- Opsional: `BRAVE_SEARCH_API_KEY`, `WEB_SEARCH_PROVIDER=wikipedia`
+
+### 2A) Full stack via Docker Compose (disarankan)
+
+```bash
+task compose:up
+# setara:
+# docker compose -f deploy/compose/docker-compose.yml --env-file .env up -d --build
+```
+
+Stack yang naik:
+
+| Service | Container | Port default |
+| :--- | :--- | :--- |
+| MongoDB | `joki-mongodb` | `27017` |
+| Orchestrator | `joki-orchestrator` | `8080` |
+| Web (Nginx) | `joki-web` | `3000` → UI |
+
+Buka UI: [http://localhost:3000](http://localhost:3000)  
+Health API: [http://localhost:8080/health](http://localhost:8080/health)
+
+Stop:
+
+```bash
+task compose:down
+```
+
+Compose file: [`deploy/compose/docker-compose.yml`](deploy/compose/docker-compose.yml) (include infra + services + web). Nginx mem-proxy `/api`, `/ws`, `/health` ke orchestrator.
+
+### 2B) Dev lokal (hot reload)
+
+```bash
+task init          # npm install + MongoDB container
+task dev           # orchestrator :8080 + Vite :5173
+```
+
+UI: [http://localhost:5173](http://localhost:5173) (Vite proxy ke backend).
+
+### Web search (sebelum scrape)
+
+```bash
+WEB_SEARCH_PROVIDER=wikipedia   # default
+# WEB_SEARCH_PROVIDER=brave
+# BRAVE_SEARCH_API_KEY=...
+WEB_SEARCH_MAX_RESULTS=3
+```
 
 ---
 
-## 🛠️ Cara Menjalankan Project (Lokal)
-Repositori ini dirancang sebagai monorepo dengan task runner untuk mempermudah pengerjaan:
-1. Pastikan Docker dan Go Task sudah terinstal.
-2. Jalankan perintah inisialisasi awal (instalasi library frontend + database infra MongoDB):
-   ```bash
-   cd app/
-   task init
-   ```
-3. Jalankan aplikasi local development (paralel Go Backend + React Frontend):
-   ```bash
-   task dev
-   ```
-4. Buka dashboard di browser: [http://localhost:5173](http://localhost:5173).
+## Cara pakai aplikasi (step by step)
+
+1. **Buka UI** — Compose: `http://localhost:3000` · Dev: `http://localhost:5173`.
+2. **Daftar / masuk** — buat akun (username + password), lalu login.
+3. **Chat baru** — klik **New chat** di sidebar (atau mulai ketik di chat kosong).
+4. **Kirim permintaan** — dua cara:
+   - **Bahasa natural**, contoh: *"Cari materi HTML dasar, ringkas, lalu buat PPT Bahasa Indonesia."*
+   - **Template chip** / ketik `/template …`, contoh:
+     ```text
+     /template joki_presentasi
+     Buat presentasi step-by-step belajar HTML, CSS, dan JS dasar.
+     ```
+     Preview pipeline muncul sebelum kirim.
+5. **Tunggu rencana** — status jadi `awaiting_approval`; timeline menampilkan urutan agen.
+6. **Gas atau Batal** — **Gas** menjalankan pipeline; **Batal** membatalkan task.
+7. **Pantau progress** — WebSocket update tiap step (scrape, summarize, PPT, dll.). Bisa **Stop** di tengah jalan.
+8. **Ambil hasil** — bila selesai, unduh file (PPTX/PDF/dll.) dari link di chat, atau baca teks hasil agen.
+9. **Riwayat** — buka percakapan lama dari sidebar; kuota chat lifetime terlihat di header (`Sisa chat: x/y`).
+
+### Tips prompt
+
+- Sebutkan **output** yang diinginkan (PPT, PDF, kode, review).
+- Untuk scrape, sebutkan **topik** jelas; orkestrator yang resolve URL.
+- Hindari minta agen yang tidak relevan (mis. *"jangan pakai outliner"*) bila pipeline template sudah cukup.
+
+### Alur singkat (diagram)
+
+```text
+User prompt → Router LLM → Pipeline plan → [Gas]
+    → Agent 1 → Agent 2 → … → Result (file/teks) → Chat
+```
+
+---
+
+## Struktur penting
+
+```text
+app/
+├── service/orchestrator/   # API + pipeline runner
+├── shared/agents/          # registry.json (SSOT)
+├── web/                    # React UI (Bananacademic)
+├── deploy/compose/         # docker-compose.*
+├── deploy/docker/          # Dockerfile + nginx.conf
+└── tools/agentcheck/       # cek kontrak agen
+```
+
+E2E multi-agen (rencana skenario): [`../docs/e2e_testing_plan.md`](../docs/e2e_testing_plan.md).

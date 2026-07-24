@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Astheria23/jokiOrchestrator/shared/agents"
 	"github.com/Astheria23/jokiOrchestrator/shared/logging"
 )
 
@@ -95,45 +96,7 @@ func (r *LLMRouter) RoutePrompt(ctx context.Context, prompt string) ([]string, e
 		return r.fallbackRoute(prompt), nil
 	}
 
-	systemPrompt := `You are the routing engine for the Joki Tugas Multi-Agent Orchestrator. 
-Your task is to analyze the user's request and plan a sequential pipeline of agents to fulfill it.
-
-Available agents are:
-1. web_scraper (input: url -> output: text) - Clean text content from a URL.
-2. data_mining (input: text|url -> output: text) - Extract key patterns from raw text or url.
-3. summarizer (input: text -> output: text) - Summarize long text.
-4. outliner (input: text -> output: outline) - Create outline structures.
-5. translator (input: text -> output: text) - Translate text to other languages.
-6. paraphrase (input: text -> output: text) - Rewrite text to remove plagiarism.
-7. typo_checker (input: text -> output: text) - Correct typography/grammar.
-8. fact_checker (input: text -> output: text) - Verify info facts.
-9. literature_reviewer (input: text -> output: text) - Build literature reviews.
-10. citation_reference (input: text -> output: text) - Build APA/IEEE citation records.
-11. qna_simulator (input: text -> output: text) - Build Q&A lists from content.
-12. math_calculator (input: text -> output: text) - Solve math equations.
-13. spatial_gis (input: text -> output: text) - Process GIS/coordinates.
-14. requirement_analyzer (input: text -> output: text) - Create SRS document.
-15. diagram_builder (input: text -> output: file) - Build diagrams (flowcharts, SVG/PNG).
-16. ppt_generator (input: text|outline -> output: file) - Build PowerPoint slide files.
-17. pdf_formatter (input: text -> output: file) - Render text to PDF format.
-18. programmer (input: text -> output: code) - Write computer code.
-19. pr_reviewer (input: code -> output: text) - Review Pull Requests/code.
-20. database_querier (input: text -> output: text) - Execute database queries.
-21. context_memory (input: text -> output: text) - Retrieve/save conversation context memory.
-22. supervisor (input: text|code -> output: text) - Quality control check of outputs.
-23. essay_writer (input: text -> output: text) - Write academic essays / makalah drafts.
-24. prompt_generator (input: text -> output: text) - Expand task briefs into strong coding prompts.
-25. qa_bug_hunter (input: text|code -> output: text) - Find bugs and QA issues in code.
-26. kesimpulan_saran (input: text -> output: text) - Write conclusions and recommendations.
-
-Rules:
-- Respond ONLY with a valid JSON object containing a "pipeline" key which is an array of strings representing the agent names in sequential order of execution.
-- Example JSON response:
-{
-  "pipeline": ["web_scraper", "summarizer", "ppt_generator"]
-}
-- Do not include markdown formatting or extra text outside the JSON object.
-- The pipeline should be a realistic, type-compatible sequence.`
+	systemPrompt := agents.RouterSystemPrompt()
 
 	reqBody := ChatRequest{
 		Model: r.model,
