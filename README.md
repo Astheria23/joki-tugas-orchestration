@@ -25,37 +25,23 @@ Joki Tugas AI (produk UI: **Bananacademic**) adalah platform otomatisasi pengerj
 | 3 | `summarizer` | Qila | 🟢 Aktif |
 | 4 | `outliner` | Eka | 🟢 Aktif |
 | 5 | `translator` | Haekal | 🟢 Aktif |
-| 6 | `paraphrase` | Viola / Piol | 🟢 Aktif |
+| 6 | `paraphrase` | Viola  | 🟢 Aktif |
 | 7 | `typo_checker` | Dina | 🟢 Aktif |
-| 8 | `fact_checker` | Razif / Zif | 🟢 Aktif |
+| 8 | `fact_checker` | Razif  | 🟢 Aktif |
 | 9 | `literature_reviewer` | Iqbal | 🟢 Aktif |
-| 10 | `citation_reference` | Hisyam / Syam | 🟢 Aktif |
+| 10 | `citation_reference` | Hisyam | 🟢 Aktif |
 | 11 | `qna_simulator` | Ferdy | 🟢 Aktif |
-| 12 | `math_calculator` | — | 🟢 Aktif |
-| 13 | `spatial_gis` | — | 🟢 Aktif |
-| 14 | `requirement_analyzer` | Sarah | 🟢 Aktif |
-| 15 | `diagram_builder` | Ahmad | 🟢 Aktif |
-| 16 | `ppt_generator` | Indra | 🟢 Aktif |
-| 17 | `pdf_formatter` | Restu | 🟢 Aktif |
-| 18 | `programmer` | Aghni | 🟢 Aktif |
-| 19 | `pr_reviewer` | — | 🟢 Aktif |
-| 20 | `database_querier` | Adit | 🟢 Aktif |
-| 21 | `context_memory` | — | 🟢 Aktif |
-| 22 | `supervisor` | Sarah | 🟢 Aktif |
-| 23 | `essay_writer` | Reyhan | 🟢 Aktif |
-| 24 | `prompt_generator` | Hilmi | 🟢 Aktif |
-| 25 | `qa_bug_hunter` | Iqmal / Iki | 🟢 Aktif |
-| 26 | `kesimpulan_saran` | Farid | 🟢 Aktif |
-
-### Template pipeline (fast-path)
-
-| Template | Pipeline |
-| :--- | :--- |
-| `joki_makalah` | scraper → data_mining → literature → essay → citation → typo → pdf |
-| `joki_koding` | prompt_generator → programmer → qa_bug_hunter → supervisor |
-| `joki_presentasi` | scraper → summarizer → outliner → ppt |
-| `review_tugas` | typo → fact_checker → supervisor → kesimpulan_saran |
-| `analisis_data` | data_mining → database_querier → diagram_builder |
+| 12 | `requirement_analyzer` | Sarah | 🟢 Aktif |
+| 13 | `diagram_builder` | Ahmad | 🟢 Aktif |
+| 14 | `ppt_generator` | Indra | 🟢 Aktif |
+| 15 | `pdf_formatter` | Restu | 🟢 Aktif |
+| 16 | `programmer` | Aghni | 🟢 Aktif |
+| 17 | `database_querier` | Adit | 🟢 Aktif |
+| 18 | `supervisor` | Sarah | 🟢 Aktif |
+| 19 | `essay_writer` | Reyhan | 🟢 Aktif |
+| 20 | `prompt_generator` | Hilmi | 🟢 Aktif |
+| 21 | `qa_bug_hunter` |  Iki | 🟢 Aktif |
+| 22 | `kesimpulan_saran` | Farid | 🟢 Aktif |
 
 Cek kontrak agen kapan saja:
 
